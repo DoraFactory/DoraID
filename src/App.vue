@@ -5,12 +5,12 @@
       <div class="account">{{ account }}</div>
     </div>
     <div>
-      <p>Dorayaki Balance: 20 DORA</p>
-      <p>质押数量: 100 DORA</p>
-      <p>质押时间: 2021/5/16 (7天3小时)</p>
+      <p>Dorayaki Balance: {{ balance }} DORA</p>
+      <p>质押数量: {{ stakingAmount }} DORA</p>
+      <p>质押时间: <StakingTime :endTime="stakingEndTime" /></p>
     </div>
     <div class="dora-console">
-      <div>质押</div>
+      <Staking />
       <div>
         <p>取回</p>
         <p>(7天3小时)</p>
@@ -28,18 +28,47 @@
     </div>
   </div>
 </template>
+
 <script>
 import { mapState } from 'vuex'
 
+import StakingTime from '@/components/StakingTime'
+import Staking from '@/components/Staking'
+
 export default {
   name: 'App',
-  computed: {
-    ...mapState(['account', 'network']),
+  components: {
+    StakingTime,
+    Staking,
   },
-  mounted() {
-    this.$store.dispatch('CONNECT')
+  computed: {
+    ...mapState(['account', 'network', 'chain']),
+  },
+  data() {
+    return {
+      balance: '--',
+      authed: false,
+      stakingAmount: '--',
+      stakingEndTime: 0,
+    }
+  },
+  async mounted() {
+    const states = await this.$store.dispatch('CONNECT')
+    if (states) {
+      this.update()
+    }
   },
   methods: {
+    update() {
+      this.chain.getDoraBalance(this.account).then((balance) => {
+        this.balance = balance
+      })
+      this.chain.getStatus(this.account).then((status) => {
+        this.authed = status.authenticated
+        this.stakingAmount = status.stakingAmount
+        this.stakingEndTime = status.stakingEndTime
+      })
+    },
     logOut() {
       this.$store.dispatch('DISCONNECT')
     },
@@ -58,6 +87,11 @@ body, p
   color #2c3e50
   margin auto
   max-width 1200px
+
+.fc
+  display flex
+  justify-content center
+  align-items center
 
 .dora-account
   margin-top 100px
@@ -96,14 +130,8 @@ body, p
   grid-template-columns repeat(5, 1fr)
   >div
     height 300px
-    display flex
-    flex-direction column
-    justify-content center
-    align-items center
-    font-size 36px
     background-color #e0e0e0
     border-radius 40px
-    cursor pointer
   >div:nth-child(1)
     grid-column 1/3
   >div:nth-child(2)

@@ -10,6 +10,8 @@ export default new Vuex.Store({
     chain: new Chain(),
     network: 0,
     account: '',
+
+    route: location.hash,
   },
   mutations: {
     UPDATE_PROVIDER(state, provider) {
@@ -21,6 +23,11 @@ export default new Vuex.Store({
     SET_NETWORK(state, chainID) {
       state.network = chainID
       localStorage.setItem('network', chainID)
+    },
+
+    UPDATE_ROUTE(state, route) {
+      state.route = route
+      history.pushState(null, '', '/' + route)
     },
   },
   actions: {

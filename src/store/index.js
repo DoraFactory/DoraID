@@ -11,6 +11,15 @@ export default new Vuex.Store({
     network: 0,
     account: '',
 
+    status: {
+      loading: true,
+      balance: '--',
+      allowance: 0,
+      authed: false,
+      stakingAmount: '--',
+      stakingEndTime: 0,
+    },
+
     route: location.hash,
   },
   mutations: {
@@ -24,6 +33,13 @@ export default new Vuex.Store({
       state.network = chainID
       localStorage.setItem('network', chainID)
     },
+    UPDATE_STATUS(state, status) {
+      state.status = {
+        ...state.status,
+        ...status,
+        loading: false,
+      }
+    },
 
     UPDATE_ROUTE(state, route) {
       state.route = route
@@ -31,7 +47,7 @@ export default new Vuex.Store({
     },
   },
   actions: {
-    CONNECT({ commit }) {
+    CONNECT({ commit, dispatch }) {
       if (typeof window.ethereum === 'undefined') {
         return false
       }
@@ -40,9 +56,11 @@ export default new Vuex.Store({
         .then((accounts) => {
           commit('UPDATE_PROVIDER', window.web3.currentProvider)
           commit('SET_ACCOUNT', accounts[0])
+          dispatch('UPDATE')
           commit('SET_NETWORK', Number(window.ethereum.chainId))
           window.ethereum.on('accountsChanged', (accounts) => {
             commit('SET_ACCOUNT', accounts[0])
+            dispatch('UPDATE')
           })
           window.ethereum.on('chainChanged', (chainID) => {
             commit('SET_NETWORK', Number(chainID))
@@ -50,6 +68,25 @@ export default new Vuex.Store({
           return true
         })
         .catch(() => false)
+    },
+    UPDATE({ state, commit }) {
+      if (!state.chain.ready || !state.account) {
+        return
+      }
+      Promise.all([
+        state.chain.getDoraBalance(state.account),
+        state.chain.getAllowance(state.account),
+        state.chain.getStatus(state.account),
+      ]).then(([balance, allowance, status]) => {
+        const result = {
+          balance,
+          allowance: Number(allowance),
+          authed: status.authenticated,
+          stakingAmount: status.stakingAmount,
+          stakingEndTime: status.stakingEndTime,
+        }
+        commit('UPDATE_STATUS', result)
+      })
     },
     DISCONNECT({ commit }) {
       commit('SET_ACCOUNT', '')

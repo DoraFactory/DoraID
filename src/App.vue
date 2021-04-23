@@ -5,16 +5,13 @@
       <div class="account">{{ account }}</div>
     </div>
     <div>
-      <p>Dorayaki Balance: {{ balance }} DORA</p>
-      <p>质押数量: {{ stakingAmount }} DORA</p>
-      <p>质押时间: <StakingTime :endTime="stakingEndTime" /></p>
+      <p>Dorayaki Balance: {{ status.balance }} DORA</p>
+      <p>质押数量: {{ status.stakingAmount }} DORA</p>
+      <p>质押时间: <StakingTime :endTime="status.stakingEndTime" /></p>
     </div>
     <div class="dora-console">
       <Staking />
-      <div>
-        <p>取回</p>
-        <p>(7天3小时)</p>
-      </div>
+      <Withdraw />
       <div>
         <p>激活</p>
       </div>
@@ -34,15 +31,17 @@ import { mapState } from 'vuex'
 
 import StakingTime from '@/components/StakingTime'
 import Staking from '@/components/Staking'
+import Withdraw from '@/components/Withdraw'
 
 export default {
   name: 'App',
   components: {
     StakingTime,
     Staking,
+    Withdraw,
   },
   computed: {
-    ...mapState(['account', 'network', 'chain']),
+    ...mapState(['account', 'network', 'chain', 'status']),
   },
   data() {
     return {
@@ -53,22 +52,12 @@ export default {
     }
   },
   async mounted() {
-    const states = await this.$store.dispatch('CONNECT')
-    if (states) {
-      this.update()
-    }
+    await this.$store.dispatch('CONNECT')
+    setInterval(() => {
+      this.$store.dispatch('UPDATE')
+    }, 10000)
   },
   methods: {
-    update() {
-      this.chain.getDoraBalance(this.account).then((balance) => {
-        this.balance = balance
-      })
-      this.chain.getStatus(this.account).then((status) => {
-        this.authed = status.authenticated
-        this.stakingAmount = status.stakingAmount
-        this.stakingEndTime = status.stakingEndTime
-      })
-    },
     logOut() {
       this.$store.dispatch('DISCONNECT')
     },

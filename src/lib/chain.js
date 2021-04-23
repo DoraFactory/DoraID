@@ -6,16 +6,19 @@ import DORAID_ABI from '@/contract/DoraID.abi.json'
 const TEST_DORA_CONTRACT = '0xB784A999E6D127fA032c4cacB15aD88C401458Ec'
 const TEST_DORAID_CONTRACT = '0x2a4b9A9394337f1Fb2617B0A36aaC62c19bD73DD'
 
+const MAX_BALANCE = '10000000000000000000000000'
+
 export default class Chain {
   constructor() {
     this.web3 = null
+    this._initWeb3('https://data-seed-prebsc-1-s1.binance.org:8545/')
   }
 
   updateProvider(provider) {
     if (!this.web3) {
       this._initWeb3(provider)
     } else {
-      this.web3.setProvider(provider)
+      // this.web3.setProvider(provider)
     }
   }
 
@@ -32,8 +35,21 @@ export default class Chain {
     return output
   }
 
+  get ready() {
+    return !!this.web3
+  }
+
   async getDoraBalance(addr) {
     return this.dora.methods['balanceOf'](addr)
+      .call()
+      .then((res) => {
+        return this.fromWei(res)
+      })
+      .catch(() => '0')
+  }
+
+  async getAllowance(addr) {
+    return this.dora.methods['allowance'](addr, TEST_DORAID_CONTRACT)
       .call()
       .then((res) => {
         return this.fromWei(res)
@@ -46,7 +62,6 @@ export default class Chain {
       .call()
       .then((res) => {
         const endTime = Number(res.stakingEndTime) * 1000
-        console.log(endTime)
         return {
           authenticated: res.authenticated,
           stakingAmount: this.fromWei(res.stakingAmount, 2),
@@ -58,6 +73,12 @@ export default class Chain {
         stakingAmount: '0',
         stakingEndTime: 0,
       }))
+  }
+
+  async approve(addr) {
+    return this.dora.methods['approve'](TEST_DORAID_CONTRACT, MAX_BALANCE).send({
+      from: addr,
+    })
   }
 
   _initWeb3(provider) {

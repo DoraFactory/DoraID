@@ -2,15 +2,12 @@
   <div id="staking">
     <div class="staking-button full fc" :opened="opened" @click="toggle">
       <transition name="fade">
-        <span v-if="!opened">Staking</span>
+        <span v-if="!opened">Withdraw</span>
       </transition>
     </div>
-    <div class="approve full fc" :show="needApprove" @click="approve">
-      <div>Approve</div>
-      <p>你需要先授权DoraID使用你的Dorayaki Token</p>
-    </div>
+    <div class="border full"></div>
     <div class="staking-form">
-      <p>追加质押数量: <input type="number" /> Dora</p>
+      <p>取回质押数量: <input type="number" /> Dora</p>
       <p>追加质押时间: <input type="number" /> 天</p>
       <div class="confirm">Confirm</div>
     </div>
@@ -22,16 +19,10 @@ import { mapState } from 'vuex'
 
 export default {
   name: 'Staking',
-  data() {
-    return {}
-  },
   computed: {
-    ...mapState(['account', 'route', 'chain', 'status']),
+    ...mapState(['route']),
     opened() {
-      return this.route === '#staking'
-    },
-    needApprove() {
-      return this.status.allowance === 0
+      return this.route === '#withdraw'
     },
   },
   methods: {
@@ -39,11 +30,8 @@ export default {
       if (this.opened) {
         this.$store.commit('UPDATE_ROUTE', '')
       } else {
-        this.$store.commit('UPDATE_ROUTE', '#staking')
+        this.$store.commit('UPDATE_ROUTE', '#withdraw')
       }
-    },
-    approve() {
-      this.chain.approve(this.account)
     },
   },
 }
@@ -57,29 +45,18 @@ export default {
   box-shadow inset 4px 6px 20px #0002
 .staking-button
   font-size 36px
-  color #3e787b
-  background-image linear-gradient(-30deg, #96deda 0%, #50c9c3 100%)
+  color #856a36
+  background-image linear-gradient(-30deg, #f6d365 0%, #ffaa6d 100%)
   transition transform .5s
   cursor pointer
   z-index 100
   &[opened]
     transform translateX(calc(100% - 40px))
-.approve
-  padding-right 40px
-  color #1a7281
-  flex-direction column
-  background-image linear-gradient(30deg, #ace2df 0%, #c9f7f5 100%)
+.border
+  background-image linear-gradient(30deg, #f6d365 0%, #fdd885 100%)
   transform translateX(calc(100% - 48px))
   transition transform .5s
   z-index 50
-  >div
-    font-size 36px
-  >p
-    margin-top 10px
-    opacity .8
-  &[show]
-    cursor pointer
-    transform translateX(0)
 .staking-form
   padding 40px 0
   margin 0 80px 0 40px
@@ -99,7 +76,7 @@ export default {
     display flex
     justify-content center
     align-items center
-    background-color #00bcd4
+    background-color #ffa44d
     color #fff
     font-size 24px
     font-weight 500

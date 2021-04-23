@@ -32,8 +32,9 @@ export default {
 .activate-button
   color #0a707f
   flex-direction column
-  background-image radial-gradient(circle 400px at center, #a2faff 0%, #7fdaf1 47%, #4cb5ff 100%)
-  transition transform .5s, filter .5s
+  background-image linear-gradient(-30deg, #a2faff 0%, #7fdaf1 100%)
+  // background-image radial-gradient(circle 400px at center, #a2faff 0%, #7fdaf1 47%, #4cb5ff 100%)
+  transition all .5s
   cursor pointer
   z-index 100
   >span
@@ -41,6 +42,7 @@ export default {
   >p
     margin-top 4px
   &[disabled]
-    filter grayscale(.9) brightness(1.1)
+    color #0a707f80
+    filter grayscale(.86) brightness(1.08)
     cursor not-allowed
 </style>

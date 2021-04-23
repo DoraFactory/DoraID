@@ -108,7 +108,7 @@ export default {
   color #856a36
   flex-direction column
   background-image linear-gradient(-30deg, #f6d365 0%, #ffaa6d 100%)
-  transition transform .5s, filter .5s
+  transition all .5s
   cursor pointer
   z-index 100
   >span
@@ -118,7 +118,8 @@ export default {
   &[opened]
     transform translateX(calc(100% - 40px))
   &[disabled]
-    filter grayscale(.9) brightness(1.2)
+    color #856a36a0
+    filter grayscale(.94) brightness(1.2)
     cursor not-allowed
 .border
   background-image linear-gradient(30deg, #f6d365 0%, #fdd885 100%)

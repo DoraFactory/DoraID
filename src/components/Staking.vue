@@ -2,7 +2,7 @@
   <div id="staking">
     <div class="staking-button full fc" :opened="opened" @click="toggle">
       <transition name="fade">
-        <span v-if="!opened">Staking</span>
+        <span v-if="!opened">Stake</span>
       </transition>
     </div>
     <div class="approve full fc" :show="needApprove" @click="approve">
@@ -10,9 +10,9 @@
       <p>你需要先授权DoraID使用你的Dorayaki Token</p>
     </div>
     <div class="staking-form">
-      <p>追加质押数量: <input type="number" /> Dora</p>
-      <p>追加质押时间: <input type="number" /> 天</p>
-      <div class="confirm">Confirm</div>
+      <p>追加质押数量<input type="number" v-model="amount" />DORA</p>
+      <p>质押时间<input type="datetime-local" :min="minStakingDatetime" v-model="endTime" /></p>
+      <div class="confirm" @click="stake">Confirm</div>
     </div>
   </div>
 </template>
@@ -23,7 +23,10 @@ import { mapState } from 'vuex'
 export default {
   name: 'Staking',
   data() {
-    return {}
+    return {
+      amount: '',
+      endTime: '',
+    }
   },
   computed: {
     ...mapState(['account', 'route', 'chain', 'status']),
@@ -32,6 +35,10 @@ export default {
     },
     needApprove() {
       return this.status.allowance === 0
+    },
+    minStakingDatetime() {
+      const ts = Math.max(Date.now() + 86400000, this.status.stakingEndTime)
+      return new Date(ts - new Date().getTimezoneOffset() * 60000).toISOString().substr(0, 16)
     },
   },
   methods: {
@@ -42,8 +49,34 @@ export default {
         this.$store.commit('UPDATE_ROUTE', '#staking')
       }
     },
-    approve() {
-      this.chain.approve(this.account)
+    async approve() {
+      if (!this.needApprove) {
+        return
+      }
+      const txHash = await this.chain.approve(this.account)
+      if (!txHash) {
+        return this.$toast.warning('Transaction not sent!')
+      }
+      this.$toast.success('Transaction sent, please wait patiently.')
+      this.$store.commit('PUSH_TX', {
+        txHash,
+        type: 'Approve',
+      })
+    },
+    async stake() {
+      // TODO: check input parameter
+      const txHash = await this.chain.stake(this.account, this.amount, this.endTime)
+      if (!txHash) {
+        return this.$toast.warning('Transaction not sent!')
+      }
+      this.$toast.success('Transaction sent, please wait patiently.')
+      this.amount = ''
+      this.endTime = ''
+      this.$store.commit('UPDATE_ROUTE', '')
+      this.$store.commit('PUSH_TX', {
+        txHash,
+        type: 'Stake',
+      })
     },
   },
 }
@@ -88,7 +121,15 @@ export default {
   position relative
   box-sizing border-box
   p
-    margin-bottom 10px
+    margin-bottom 20px
+    align-items center
+  input[type=number]
+    margin 0 10px
+    width 100px
+  input[type=datetime-local]
+    margin-left 10px
+    width 230px
+    font-size 16px
   .confirm
     position absolute
     left 0
@@ -104,14 +145,6 @@ export default {
     font-size 24px
     font-weight 500
     cursor pointer
-
-.full
-  position absolute
-  top 0
-  left 0
-  width 100%
-  height 100%
-  box-sizing border-box
 
 .fade-enter, .fade-leave-to
   opacity 0

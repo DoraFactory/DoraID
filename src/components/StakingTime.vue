@@ -2,7 +2,7 @@
   <div style="display: contents">
     <template v-if="endTime">
       <span>{{ date }}</span>
-      <span class="time-left">距离解锁还有: {{ timeLeft }}</span>
+      <!-- <span class="time-left">距离解锁还有: {{ timeLeft }}</span> -->
     </template>
     <template v-else>
       <span>已解锁</span>
@@ -44,7 +44,8 @@ export default {
     update() {
       const now = Date.now()
       if (now > this.endTime) {
-        return ''
+        this.timeLeft = '0sec'
+        return
       }
       const dt = this.endTime - now
       const days = Math.floor(dt / 86400000)
@@ -53,13 +54,13 @@ export default {
       const seconds = Math.floor((dt % 60000) / 1000)
       let output = ''
       if (days) {
-        output = `${days}天 ${hours}小时`
+        output = `${days}days ${hours}h`
       } else if (hours) {
-        output = `${hours}小时 ${minutes}分钟`
+        output = `${hours}h ${minutes}min`
       } else if (minutes) {
-        output = `${minutes}分钟 ${seconds}秒`
+        output = `${minutes}min ${seconds}sec`
       } else {
-        output = `${seconds}秒`
+        output = `${seconds}sec`
       }
       this.timeLeft = output
     },

@@ -11,14 +11,13 @@ const MAX_BALANCE = '10000000000000000000000000'
 export default class Chain {
   constructor() {
     this.web3 = null
-    this._initWeb3('https://data-seed-prebsc-1-s1.binance.org:8545/')
   }
 
   updateProvider(provider) {
     if (!this.web3) {
       this._initWeb3(provider)
     } else {
-      // this.web3.setProvider(provider)
+      this.web3.setProvider(provider)
     }
   }
 
@@ -37,6 +36,17 @@ export default class Chain {
 
   get ready() {
     return !!this.web3
+  }
+
+  async getTxStatus(txHash) {
+    const receipt = await this.web3.eth.getTransactionReceipt(txHash)
+    if (!receipt) {
+      return 'Pending'
+    } else if (receipt.status) {
+      return 'Success'
+    } else {
+      return 'Fail'
+    }
   }
 
   async getDoraBalance(addr) {
@@ -76,9 +86,60 @@ export default class Chain {
   }
 
   async approve(addr) {
-    return this.dora.methods['approve'](TEST_DORAID_CONTRACT, MAX_BALANCE).send({
+    const data = this.dora.methods['approve'](TEST_DORAID_CONTRACT, MAX_BALANCE).encodeABI()
+    const tx = {
       from: addr,
-    })
+      to: TEST_DORA_CONTRACT,
+      data,
+    }
+    return window.ethereum
+      .request({
+        method: 'eth_sendTransaction',
+        params: [tx],
+      })
+      .catch((error) => {
+        console.error(error.message || error)
+        return false
+      })
+  }
+
+  async stake(addr, inputAmount, inputEndTime) {
+    const amount = this.web3.utils.toWei(inputAmount)
+    const endTime = Math.floor(new Date(inputEndTime).getTime() / 1000)
+    const data = this.doraId.methods['stake'](amount, endTime).encodeABI()
+    const tx = {
+      from: addr,
+      to: TEST_DORAID_CONTRACT,
+      data,
+    }
+    return window.ethereum
+      .request({
+        method: 'eth_sendTransaction',
+        params: [tx],
+      })
+      .catch((error) => {
+        console.error(error.message || error)
+        return false
+      })
+  }
+
+  async unstake(addr, inputAmount) {
+    const amount = this.web3.utils.toWei(inputAmount)
+    const data = this.doraId.methods['unstake'](amount).encodeABI()
+    const tx = {
+      from: addr,
+      to: TEST_DORAID_CONTRACT,
+      data,
+    }
+    return window.ethereum
+      .request({
+        method: 'eth_sendTransaction',
+        params: [tx],
+      })
+      .catch((error) => {
+        console.error(error.message || error)
+        return false
+      })
   }
 
   _initWeb3(provider) {

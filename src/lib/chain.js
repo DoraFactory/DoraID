@@ -142,6 +142,24 @@ export default class Chain {
       })
   }
 
+  async activate(addr, aim) {
+    const data = this.doraId.methods['activate'](aim).encodeABI()
+    const tx = {
+      from: addr,
+      to: TEST_DORAID_CONTRACT,
+      data,
+    }
+    return window.ethereum
+      .request({
+        method: 'eth_sendTransaction',
+        params: [tx],
+      })
+      .catch((error) => {
+        console.error(error.message || error)
+        return false
+      })
+  }
+
   _initWeb3(provider) {
     this.web3 = new Web3(provider)
     this.dora = new this.web3.eth.Contract(ERC20_ABI, TEST_DORA_CONTRACT)

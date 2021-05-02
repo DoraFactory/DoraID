@@ -156,14 +156,6 @@ export default {
     font-weight 500
     cursor pointer
 
-.full
-  position absolute
-  top 0
-  left 0
-  width 100%
-  height 100%
-  box-sizing border-box
-
 .fade-enter, .fade-leave-to
   opacity 0
 .fade-leave-active

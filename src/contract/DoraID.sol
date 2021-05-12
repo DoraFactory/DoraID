@@ -1,5 +1,5 @@
 // "SPDX-License-Identifier: UNLICENSED"
-pragma solidity ^0.8.0;
+pragma solidity 0.8.2;
 
 /**
  * @title ERC20
@@ -75,7 +75,7 @@ contract DoraID {
   constructor(ERC20 _dora, address[] memory _initUserList, uint256[] memory _initPOSList) {
     DORAYAKI = _dora;
 
-    require(_initUserList.length == _initPOSList.length);
+    require(_initUserList.length == _initPOSList.length, "Parameter array length mismatch");
 
     for (uint256 i = 0; i < _initUserList.length; i++) {
       address addr = _initUserList[i];
@@ -90,7 +90,7 @@ contract DoraID {
    * @dev Prevents a contract from calling itself, directly or indirectly.
    */
   modifier nonReentrant() {
-    require(!_rentrancyLock);
+    require(!_rentrancyLock, "Reentrant error");
     _rentrancyLock = true;
     _;
     _rentrancyLock = false;
@@ -108,7 +108,7 @@ contract DoraID {
     if (!user.authenticated) {
       return 0;
     }
-    proof = user.proofOfStake + (block.timestamp - user.lastSeen) * user.stakingAmount;
+    proof = user.proofOfStake.add((block.timestamp.sub(user.lastSeen)).mul(user.stakingAmount));
     if (proof > MAX_STORED_POS) {
       proof = MAX_STORED_POS;
     }
@@ -129,29 +129,29 @@ contract DoraID {
 
   function childOf(address _user, uint256 _index) public view returns (address) {
     uint256 size = childrenSizeOf(_user);
-    require(_index < size);
+    require(_index < size, "Overflow");
     return _users[_user].children[_index];
   }
 
-  function stake(uint256 _amount, uint256 _endTime, uint256 _tip, address _entrusted) public {
+  function stake(uint256 _amount, uint256 _endTime, uint256 _tip, address _entrusted) external {
     uint256 tip = _tips[msg.sender];
     if (tip > 0) {
       _tips[msg.sender] = 0;
-      require(DORAYAKI.transfer(msg.sender, tip));
+      require(DORAYAKI.transfer(msg.sender, tip), "ERC20 transfer error");
     }
-    require(DORAYAKI.transferFrom(msg.sender, address(this), _tip));
     _tips[msg.sender] = _tip;
+    require(DORAYAKI.transferFrom(msg.sender, address(this), _tip), "ERC20 transfer error");
     _entrusteds[msg.sender] = _entrusted;
     
     stake(_amount, _endTime);
   }
   function stake(uint256 _amount, uint256 _endTime) public nonReentrant {
-    require(DORAYAKI.transferFrom(msg.sender, address(this), _amount));
+    require(DORAYAKI.transferFrom(msg.sender, address(this), _amount), "ERC20 transfer error");
 
     UserInfo storage user = _users[msg.sender];
     _updatePOS(user);
 
-    require(user.stakingEndTime <= _endTime);
+    require(user.stakingEndTime <= _endTime, "Can not set an earlier staking time");
     
     uint256 totalStaking = user.stakingAmount.add(_amount);
 
@@ -161,41 +161,52 @@ contract DoraID {
     emit Stake(msg.sender, totalStaking, _endTime);
   }
 
-  function unstake(uint256 _amount) public {
+  function unstake(uint256 _amount) external {
     unstake(_amount, 0);
   }
   function unstake(uint256 _amount, uint256 _endTime) public nonReentrant {
     UserInfo storage user = _users[msg.sender];
     _updatePOS(user);
 
-    require(user.stakingEndTime < block.timestamp);
-    require(user.stakingEndTime <= _endTime || _endTime == 0);
+    require(user.stakingEndTime < block.timestamp, "Unfinished staking");
+    require(user.stakingEndTime <= _endTime || _endTime == 0, "Can not set an earlier staking time");
+
+    uint256 tip = _tips[msg.sender];
+    if (tip > 0) {
+      _tips[msg.sender] = 0;
+      require(DORAYAKI.transfer(msg.sender, tip), "ERC20 transfer error");
+    }
 
     uint256 remainder = user.stakingAmount.sub(_amount);
   
     user.stakingAmount = remainder;
     user.stakingEndTime = _endTime;
 
-    require(DORAYAKI.transfer(msg.sender, _amount));
+    require(DORAYAKI.transfer(msg.sender, _amount), "ERC20 transfer error");
 
     emit Stake(msg.sender, remainder, _endTime);
   }
 
+  function activate(address _newUser, uint256 _withTip) external {
+    uint256 tip = _tips[_newUser];
+    require(tip >= _withTip, "The current tip is lower than expected");
+    activate(_newUser);
+  }
   function activate(address _newUser) public nonReentrant {
     UserInfo storage user = _users[msg.sender];
     _updatePOS(user);
     UserInfo storage newUser = _users[_newUser];
 
     address entrusted = _entrusteds[_newUser];
-    require(entrusted == address(0) || entrusted == msg.sender);
+    require(entrusted == address(0) || entrusted == msg.sender, "The new user specifies the activator");
   
-    require(user.authenticated);
-    require(user.proofOfStake >= ACTIVATION_FEE);
+    require(user.authenticated, "No permission");
+    require(user.proofOfStake >= ACTIVATION_FEE, "Insufficient POS");
     user.proofOfStake -= ACTIVATION_FEE;
   
-    require(!newUser.authenticated);
-    require(newUser.stakingAmount >= MIN_AUTH_STAKING);
-    require(newUser.stakingEndTime >= block.timestamp + MIN_AUTH_DURATION);
+    require(!newUser.authenticated, "The user has been activated");
+    require(newUser.stakingAmount >= MIN_AUTH_STAKING, "User's staking amount is not up to standard");
+    require(newUser.stakingEndTime >= block.timestamp.add(MIN_AUTH_DURATION), "User's staking time is not up to standard");
 
     uint256 tip = _tips[_newUser];
     if (tip > 0) {
@@ -206,11 +217,11 @@ contract DoraID {
     _activate(msg.sender, _newUser);
   }
 
-  function forceQuit() public {
+  function forceQuit() external {
     UserInfo storage user = _users[msg.sender];
     _updatePOS(user);
 
-    require(user.stakingAmount >= FORCE_QUIT_THRESHOLD);
+    require(user.stakingAmount >= FORCE_QUIT_THRESHOLD, "Staking amount is not up to standard");
     user.stakingEndTime = block.timestamp + FORCE_QUIT_DURATION;
 
     emit Stake(msg.sender, user.stakingAmount, user.stakingEndTime);
@@ -226,7 +237,7 @@ contract DoraID {
 
   function _updatePOS(UserInfo storage _user) internal returns (uint256 proof) {
     if (_user.authenticated) {
-      proof = _user.proofOfStake + (block.timestamp - _user.lastSeen) * _user.stakingAmount;
+      proof = _user.proofOfStake.add((block.timestamp.sub(_user.lastSeen)).mul(_user.stakingAmount));
     }
     if (proof > MAX_STORED_POS) {
       proof = MAX_STORED_POS;

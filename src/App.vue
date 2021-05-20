@@ -1,8 +1,7 @@
 <template>
   <div id="app">
-    <Login v-if="!account" />
-    <NetworkError v-else-if="network !== requireNetwork" />
-    <Home v-else />
+    <Home v-if="logined" />
+    <Login v-else :netError="networkError" />
   </div>
 </template>
 
@@ -11,7 +10,6 @@ import { mapState } from 'vuex'
 
 import Home from '@/views/Home.vue'
 import Login from '@/views/Login.vue'
-import NetworkError from '@/views/NetworkError.vue'
 
 const NETWORK = 97
 
@@ -20,18 +18,63 @@ export default {
   components: {
     Home,
     Login,
-    NetworkError,
-  },
-  data() {
-    return {
-      requireNetwork: NETWORK,
-    }
   },
   computed: {
     ...mapState(['account', 'network']),
+    logined() {
+      return !!(this.account && this.network === NETWORK)
+    },
+    networkError() {
+      return !!(this.account && this.network !== NETWORK)
+    },
   },
   created() {
     this.$store.dispatch('CONNECT')
   },
 }
 </script>
+
+<style lang="stylus">
+*
+  box-sizing border-box
+
+body, p
+  margin 0
+
+body
+  background-color #f5f6f9
+  color #000
+  font-family 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif
+  -webkit-font-smoothing antialiased
+  -moz-osx-font-smoothing grayscale
+
+.fc
+  display flex
+  justify-content center
+  align-items center
+.full
+  position absolute
+  top 0
+  left 0
+  width 100%
+  height 100%
+  box-sizing border-box
+input
+  height 40px
+  border solid 1px #ccc
+  padding 0 10px
+  font inherit
+
+.main-width
+  margin auto
+  padding 0 20px
+  max-width 1190px
+
+.logo
+  font-family Arial, Helvetica, sans-serif
+  font-size 24px
+  line-height 28px
+  font-weight 600
+  span
+    color #5f2eea
+</style>

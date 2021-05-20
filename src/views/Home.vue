@@ -1,33 +1,60 @@
 <template>
-  <div class="home">
-    <div class="dora-account">
-      <div class="icon" :authed="status.authed">
-        <span>{{ status.authed ? '已认证' : '未认证' }}</span>
+  <div id="home">
+    <nav>
+      <div class="main-width">
+        <div class="logo">DORA <span>ID</span></div>
       </div>
-      <div class="account">{{ account }}</div>
-    </div>
-    <div class="dora-info">
-      <p>Dorayaki Balance: {{ status.balance }} DORA</p>
-      <p>Staking Amount: {{ status.stakingAmount }} DORA</p>
-      <p>Staking Time: <StakingTime :endTime="status.stakingEndTime" /></p>
-    </div>
-    <div class="dora-console">
-      <Staking />
-      <Withdraw />
-      <Activate />
-      <ToAuth />
-    </div>
-    <div class="dora-logs">
-      <p>交易记录</p>
-      <div class="no-txs" v-if="txList.length === 0">Empty</div>
-      <transition-group name="slide">
-        <TxLog v-for="item in txList" :key="item.txHash" :tx="item" />
-      </transition-group>
+    </nav>
+    <div class="home-container main-width">
+      <div class="dora-account">
+        {{ account }}
+      </div>
+      <div class="dora-states"></div>
+      <div class="dora-states"></div>
+      <div class="dora-states"></div>
+
+      <div class="dora-feature">
+        <div class="title">Stake</div>
+      </div>
+      <div class="dora-feature">
+        <div class="title">Withdraw</div>
+      </div>
+      <div class="dora-feature">
+        <div class="title">Activate</div>
+      </div>
+
+      <div class="tx-log"></div>
+      <!-- <div class="dora-account">
+        <div class="icon" :authed="status.authed">
+          <span>{{ status.authed ? '已认证' : '未认证' }}</span>
+        </div>
+        <div class="account">{{ account }}</div>
+      </div>
+      <div class="dora-info">
+        <p>Dorayaki Balance: {{ status.balance }} DORA</p>
+        <p>Staking Amount: {{ status.stakingAmount }} DORA</p>
+        <p>Staking Time: <StakingTime :endTime="status.stakingEndTime" /></p>
+      </div>
+      <div class="dora-console">
+        <Staking />
+        <Withdraw />
+        <Activate />
+        <ToAuth />
+      </div>
+      <div class="dora-logs">
+        <p>交易记录</p>
+        <div class="no-txs" v-if="txList.length === 0">Empty</div>
+        <transition-group name="slide">
+          <TxLog v-for="item in txList" :key="item.txHash" :tx="item" />
+        </transition-group>
+      </div> -->
     </div>
   </div>
 </template>
 
 <script>
+/* eslint-disable vue/no-unused-components */
+
 import { mapState } from 'vuex'
 
 import StakingTime from '@/components/StakingTime'
@@ -83,117 +110,48 @@ export default {
 </script>
 
 <style lang="stylus">
-body, p
-  margin 0
-body
-  background-color #fbfcfd
-  background-image linear-gradient(45deg, #fff 25%, transparent 25%, transparent 75%, #fff 75%, #fff),
-  linear-gradient(-45deg, #fff 25%, transparent 25%, transparent 75%, #fff 75%, #fff)
-  background-size 40px 40px
+#home
+  min-height 100vh
+  background rgba(#251abb, .06) url('~@/assets/bg.svg') no-repeat center top / 100% auto
 
-#app
-  font-family Avenir, Helvetica, Arial, sans-serif
-  -webkit-font-smoothing antialiased
-  -moz-osx-font-smoothing grayscale
-  color #2c3e50
-  margin auto
-  padding 0 40px
-  max-width 1200px
+nav
+  background-color #fff
+  >div
+    height 62px
+    display flex
+    align-items center
 
-.fc
-  display flex
-  justify-content center
-  align-items center
-.full
-  position absolute
-  top 0
-  left 0
-  width 100%
-  height 100%
-  box-sizing border-box
-
-input
-  height 40px
-  border solid 1px #ccc
-  padding 0 10px
-  font inherit
+.home-container
+  margin 50px auto !important
+  display grid
+  grid-template-columns repeat(9, 1fr)
+  grid-gap 40px 20px
+  >div
+    background-color #fff
+    border-radius 8px
 
 .dora-account
-  margin-top 100px
-  display flex
-  .icon
-    margin-right 20px
-    width 80px
-    height 80px
-    border-radius 40px
-    background-color #e6e6e6
-    position relative
-    &[authed]
-      background-color #cddc39
-    span
-      position absolute
-      font-size 12px
-      font-weight 800
-      white-space nowrap
-      opacity .4
-      bottom 6px
-      left 50%
-      transform translateX(-50%)
-  .account
-    padding 0 50px
-    height 80px
-    flex 1 1 auto
-    border-radius 40px
-    background-color #ffd54f
-    font-size 24px
-    font-family monospace
-    display flex
-    align-items center
+  grid-column-end 3 span
+  height 194px
 
-.dora-console
-  margin 60px 0 80px
-  display grid
-  grid-gap 40px
-  grid-template-columns repeat(5, 1fr)
-  position relative
-  overflow hidden
-  >div
-    height 300px
-    background-color #e0e0e0
-    border-radius 40px
-  >div:nth-child(1)
-    grid-column 1/3
-  >div:nth-child(2)
-    grid-column 3/5
+.dora-states
+  grid-column-end 2 span
+  height 194px
 
-.dora-info
-  margin 30px 20px
-  font-size 16px
-  color #999
-  p
-    margin 10px 0
-    text-align right
-
-.dora-logs
-  >p
-    margin 10px 20px
+.dora-feature
+  grid-column-end 3 span
+  height 278px
+  .title
+    height 40px
+    border-bottom solid 1px rgba(#e6e8f0, .5)
+    color #140d7c
     font-size 18px
-    color #999
-  .no-txs
-    padding 0 40px
-    height 60px
-    border-radius 20px
+    font-weight 500
     display flex
-    align-items center
     justify-content center
-    background-color #f5f7fa
-    font-size 18px
-    color #c3cfe2
+    align-items center
 
-.slide-enter, .slide-leave-to
-  opacity 0
-.slide-enter-active, .slide-leave-active
-  transition opacity .6s !important
-.slide-move
-  transition transform .6s !important
+.tx-log
+  grid-column-end 9 span
+  min-height 100px
 </style>

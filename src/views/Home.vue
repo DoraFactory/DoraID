@@ -2,35 +2,52 @@
   <div id="home">
     <nav>
       <div class="main-width">
-        <div class="logo">DORA <span>ID</span></div>
+        <img height="40px" src="@/assets/logo.svg" alt="logo" />
       </div>
     </nav>
     <div class="home-container main-width">
-      <div class="dora-account">
-        {{ account }}
+      <div class="dora-account" :not-certified="!status.authed">
+        <p>
+          <img v-if="status.authed" src="@/assets/certified.svg" />
+          <img v-else src="@/assets/not-certified.svg" />
+          <span>{{ status.authed ? 'Certified' : 'Not Certified' }}</span>
+        </p>
+        <div class="addr">{{ account }}</div>
       </div>
-      <div class="dora-states"></div>
-      <div class="dora-states"></div>
-      <div class="dora-states"></div>
+      <div class="dora-states">
+        <p class="title">DORA Balance</p>
+        <p class="amount">{{ status.balance }}</p>
+        <p class="unit">DORA</p>
+      </div>
+      <div class="dora-states">
+        <p class="title">Staking Amount</p>
+        <p class="amount">{{ status.stakingAmount }}</p>
+        <p class="unit">DORA</p>
+      </div>
+      <div class="dora-states">
+        <p class="title">Staking Status</p>
+        <p class="amount"></p>
+        <p class="unit">Unlocked</p>
+      </div>
 
       <div class="dora-feature">
-        <div class="title">Stake</div>
+        <div class="title">
+          <span>Stake</span>
+        </div>
       </div>
       <div class="dora-feature">
-        <div class="title">Withdraw</div>
+        <div class="title">
+          <span>Withdraw</span>
+        </div>
       </div>
       <div class="dora-feature">
-        <div class="title">Activate</div>
+        <div class="title">
+          <span>Activate</span>
+        </div>
       </div>
 
       <div class="tx-log"></div>
-      <!-- <div class="dora-account">
-        <div class="icon" :authed="status.authed">
-          <span>{{ status.authed ? '已认证' : '未认证' }}</span>
-        </div>
-        <div class="account">{{ account }}</div>
-      </div>
-      <div class="dora-info">
+      <!-- <div class="dora-info">
         <p>Dorayaki Balance: {{ status.balance }} DORA</p>
         <p>Staking Amount: {{ status.stakingAmount }} DORA</p>
         <p>Staking Time: <StakingTime :endTime="status.stakingEndTime" /></p>
@@ -133,16 +150,76 @@ nav
 .dora-account
   grid-column-end 3 span
   height 194px
+  background linear-gradient(to right, rgba(255, 255, 255, 0.4) 40%, rgba(198, 192, 255, 0.4))
+  overflow hidden
+  position relative
+  z-index 1
+  &[not-certified]
+    filter grayscale(0.6)
+    >p
+      color #aeb0c1
+  &:before
+    content 'Address'
+    position absolute
+    top 50px
+    right 0
+    padding-left 20%
+    width calc(100% - 10px)
+    height 100%
+    background linear-gradient(30deg, #9E98FF 40%, rgba(95, 46, 234, 0) 98%)
+    font-size 30px
+    line-height 50px
+    font-weight 200
+    color rgba(#fff, 0.3)
+    transform-origin top right
+    transform rotate(-9deg)
+  >p
+    padding 20px
+    display flex
+    align-items center
+    color #251abb
+    >img
+      margin-right 4px
+  .addr
+    position absolute
+    left 0
+    bottom 0
+    padding 20px
+    width 100%
+    font-size 12px
+    font-weight 600
+    color #fff
 
 .dora-states
+  padding 30px
   grid-column-end 2 span
   height 194px
+  display flex
+  flex-direction column
+  justify-content space-between
+  align-items center
+  .title
+    font-size 18px
+    line-height 24px
+    color rgba(#2b3137, 0.7)
+  .amount
+    font-family Impact, sans-serif
+    font-size 48px
+    line-height 48px
+    color #140d7c
+  .unit
+    font-family Arial, Helvetica, sans-serif
+    font-size 16px
+    line-height 24px
+    font-weight 600
 
 .dora-feature
   grid-column-end 3 span
   height 278px
+  transition box-shadow .2s
   .title
     height 40px
+    line-height 40px
     border-bottom solid 1px rgba(#e6e8f0, .5)
     color #140d7c
     font-size 18px
@@ -150,7 +227,26 @@ nav
     display flex
     justify-content center
     align-items center
-
+    >span
+      position relative
+      transition color .14s
+    >span:after
+      content ''
+      position absolute
+      bottom 0
+      left 0
+      width 100%
+      height 2px
+      border-radius 1px
+      background-color #5f2eea
+      transform scaleX(0)
+      transition transform .2s
+  &:hover
+    box-shadow 0 4px 4px rgba(68, 55, 204, 0.1)
+    .title
+      color #5f2eea
+      >span:after
+        transform scaleX(1)
 .tx-log
   grid-column-end 9 span
   min-height 100px

@@ -53,7 +53,7 @@ export default class Chain {
     return this.dora.methods['balanceOf'](addr)
       .call()
       .then((res) => {
-        return this.fromWei(res)
+        return this.fromWei(res, 2)
       })
       .catch(() => '0')
   }

@@ -6,6 +6,7 @@ import Chain from '@/lib/chain'
 Vue.use(Vuex)
 
 const txsCheckingTimer = new Map()
+const MAX_LOGS_LENGTH = 5
 
 export default new Vuex.Store({
   state: {
@@ -55,6 +56,10 @@ export default new Vuex.Store({
         ...tx,
         status: 'Pending',
       })
+      if (state.txList.length > MAX_LOGS_LENGTH) {
+        const oldTx = state.txList.pop()
+        txsCheckingTimer.delete(oldTx.txHash)
+      }
       txsCheckingTimer.set(tx.txHash, {
         interval: 3000,
         lastCheck: Date.now() + 3000,

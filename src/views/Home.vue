@@ -1,33 +1,82 @@
 <template>
-  <div class="home">
-    <div class="dora-account">
-      <div class="icon" :authed="status.authed">
-        <span>{{ status.authed ? '已认证' : '未认证' }}</span>
+  <div id="home">
+    <nav>
+      <div class="main-width">
+        <img height="40px" src="@/assets/logo.svg" alt="logo" />
       </div>
-      <div class="account">{{ account }}</div>
-    </div>
-    <div class="dora-info">
-      <p>Dorayaki Balance: {{ status.balance }} DORA</p>
-      <p>Staking Amount: {{ status.stakingAmount }} DORA</p>
-      <p>Staking Time: <StakingTime :endTime="status.stakingEndTime" /></p>
-    </div>
-    <div class="dora-console">
-      <Staking />
-      <Withdraw />
-      <Activate />
-      <ToAuth />
-    </div>
-    <div class="dora-logs">
-      <p>交易记录</p>
-      <div class="no-txs" v-if="txList.length === 0">Empty</div>
-      <transition-group name="slide">
-        <TxLog v-for="item in txList" :key="item.txHash" :tx="item" />
-      </transition-group>
+    </nav>
+    <div class="home-container main-width">
+      <div class="dora-account" :not-certified="!status.authed">
+        <p>
+          <img v-if="status.authed" src="@/assets/certified.svg" />
+          <img v-else src="@/assets/not-certified.svg" />
+          <span>{{ status.authed ? 'Certified' : 'Not Certified' }}</span>
+        </p>
+        <div class="addr">{{ account }}</div>
+      </div>
+      <div class="dora-states">
+        <p class="title">DORA Balance</p>
+        <p class="amount">{{ status.balance }}</p>
+        <p class="unit">DORA</p>
+      </div>
+      <div class="dora-states">
+        <p class="title">Staking Amount</p>
+        <p class="amount">{{ status.stakingAmount }}</p>
+        <p class="unit">DORA</p>
+      </div>
+      <div class="dora-states">
+        <p class="title">Staking Status</p>
+        <StakingTime :locked.sync="locked" :endTime="status.stakingEndTime" />
+        <p class="unit">{{ locked ? 'Locked' : 'Unlocked' }}</p>
+      </div>
+
+      <div class="dora-feature">
+        <div class="title">
+          <span>Stake</span>
+        </div>
+        <Staking />
+      </div>
+      <div class="dora-feature">
+        <div class="title">
+          <span>Withdraw</span>
+        </div>
+        <Withdraw />
+      </div>
+      <div class="dora-feature" :foucs="toCertify">
+        <i />
+        <div class="container">
+          <div class="title">
+            <span>Certify</span>
+          </div>
+          <Activate />
+        </div>
+      </div>
+
+      <div class="tx-log">
+        <p class="title">History</p>
+        <div class="no-txs" v-if="txList.length === 0">Empty</div>
+        <transition-group name="slide" tag="div">
+          <TxLog v-for="item in txList" :key="item.txHash" :tx="item" />
+        </transition-group>
+      </div>
+      <!-- <div class="dora-info">
+        <p>Dorayaki Balance: {{ status.balance }} DORA</p>
+        <p>Staking Amount: {{ status.stakingAmount }} DORA</p>
+        <p>Staking Time: <StakingTime :endTime="status.stakingEndTime" /></p>
+      </div>
+      <div class="dora-console">
+        <Staking />
+        <Withdraw />
+        <Activate />
+        <ToAuth />
+      </div> -->
     </div>
   </div>
 </template>
 
 <script>
+/* eslint-disable vue/no-unused-components */
+
 import { mapState } from 'vuex'
 
 import StakingTime from '@/components/StakingTime'
@@ -50,7 +99,10 @@ export default {
     TxLog,
   },
   computed: {
-    ...mapState(['account', 'chain', 'status', 'txList']),
+    ...mapState(['account', 'route', 'chain', 'status', 'txList']),
+    toCertify() {
+      return this.route.startsWith('#a?t=')
+    },
   },
   data() {
     return {
@@ -58,6 +110,7 @@ export default {
       authed: false,
       stakingAmount: '--',
       stakingEndTime: 0,
+      locked: true,
 
       timer: [0, 0],
     }
@@ -83,117 +136,275 @@ export default {
 </script>
 
 <style lang="stylus">
-body, p
-  margin 0
-body
-  background-color #fbfcfd
-  background-image linear-gradient(45deg, #fff 25%, transparent 25%, transparent 75%, #fff 75%, #fff),
-  linear-gradient(-45deg, #fff 25%, transparent 25%, transparent 75%, #fff 75%, #fff)
-  background-size 40px 40px
+#home
+  min-height 100vh
+  background rgba(#251abb, .06) url('~@/assets/bg.svg') no-repeat center top / 100% auto
 
-#app
-  font-family Avenir, Helvetica, Arial, sans-serif
-  -webkit-font-smoothing antialiased
-  -moz-osx-font-smoothing grayscale
-  color #2c3e50
-  margin auto
-  padding 0 40px
-  max-width 1200px
+nav
+  background-color #fff
+  >div
+    height 62px
+    display flex
+    align-items center
 
-.fc
-  display flex
-  justify-content center
-  align-items center
-.full
-  position absolute
-  top 0
-  left 0
-  width 100%
-  height 100%
-  box-sizing border-box
-
-input
-  height 40px
-  border solid 1px #ccc
-  padding 0 10px
-  font inherit
+.home-container
+  margin 50px auto !important
+  display grid
+  grid-template-columns repeat(9, 1fr)
+  grid-gap 40px 20px
+  >div
+    background-color #fff
+    border-radius 8px
 
 .dora-account
-  margin-top 100px
-  display flex
-  .icon
-    margin-right 20px
-    width 80px
-    height 80px
-    border-radius 40px
-    background-color #e6e6e6
-    position relative
-    &[authed]
-      background-color #cddc39
-    span
-      position absolute
-      font-size 12px
-      font-weight 800
-      white-space nowrap
-      opacity .4
-      bottom 6px
-      left 50%
-      transform translateX(-50%)
-  .account
-    padding 0 50px
-    height 80px
-    flex 1 1 auto
-    border-radius 40px
-    background-color #ffd54f
-    font-size 24px
-    font-family monospace
-    display flex
-    align-items center
-
-.dora-console
-  margin 60px 0 80px
-  display grid
-  grid-gap 40px
-  grid-template-columns repeat(5, 1fr)
-  position relative
+  grid-column-end 3 span
+  height 194px
+  background linear-gradient(to right, rgba(255, 255, 255, 0.4) 40%, rgba(198, 192, 255, 0.4))
   overflow hidden
-  >div
-    height 300px
-    background-color #e0e0e0
-    border-radius 40px
-  >div:nth-child(1)
-    grid-column 1/3
-  >div:nth-child(2)
-    grid-column 3/5
-
-.dora-info
-  margin 30px 20px
-  font-size 16px
-  color #999
-  p
-    margin 10px 0
-    text-align right
-
-.dora-logs
+  position relative
+  z-index 1
+  &[not-certified]
+    filter grayscale(0.6)
+    >p
+      color #aeb0c1
+  &:before
+    content 'Address'
+    position absolute
+    top 50px
+    right 0
+    padding-left 20%
+    width calc(100% - 10px)
+    height 100%
+    background linear-gradient(30deg, #9E98FF 40%, rgba(95, 46, 234, 0) 98%)
+    font-size 30px
+    line-height 50px
+    font-weight 200
+    color rgba(#fff, 0.3)
+    transform-origin top right
+    transform rotate(-9deg)
   >p
-    margin 10px 20px
-    font-size 18px
-    color #999
-  .no-txs
-    padding 0 40px
-    height 60px
-    border-radius 20px
+    padding 20px
     display flex
     align-items center
-    justify-content center
-    background-color #f5f7fa
+    color #251abb
+    >img
+      margin-right 4px
+  .addr
+    position absolute
+    left 0
+    bottom 0
+    padding 20px
+    width 100%
+    font-size 12px
+    font-weight 600
+    color #fff
+
+.dora-states
+  padding 30px
+  grid-column-end 2 span
+  height 194px
+  display flex
+  flex-direction column
+  justify-content space-between
+  align-items center
+  .title
     font-size 18px
-    color #c3cfe2
+    line-height 24px
+    color rgba(#2b3137, 0.7)
+  .amount
+    font-family Impact, sans-serif
+    font-size 48px
+    line-height 48px
+    color #140d7c
+  .unit
+    font-family Arial, Helvetica, sans-serif
+    font-size 16px
+    line-height 24px
+    font-weight 600
+
+.dora-feature
+  grid-column-end 3 span
+  height 278px
+  transition box-shadow .2s
+  position relative
+  z-index 1
+  .title
+    height 40px
+    line-height 40px
+    border-bottom solid 1px rgba(#e6e8f0, .5)
+    color #140d7c
+    font-size 18px
+    font-weight 500
+    display flex
+    justify-content center
+    align-items center
+    >span
+      position relative
+      transition color .14s
+    >span:after
+      content ''
+      position absolute
+      bottom 0
+      left 0
+      width 100%
+      height 2px
+      border-radius 1px
+      background-color #5f2eea
+      transform scaleX(0)
+      transition transform .2s
+  &:hover
+    box-shadow 0 4px 4px rgba(68, 55, 204, 0.1)
+    .title
+      color #5f2eea
+      >span:after
+        transform scaleX(1)
+  &[foucs]
+    background none
+    .container
+      background-color #fff
+      border-radius 8px
+      position absolute
+    >i
+      position fixed
+      top 0
+      left 0
+      right 0
+      bottom 0
+      background-color #0008
+
+.dora-form
+  padding 20px
+  >hr
+    margin 8px 0 12px
+    border none
+    height 1px
+    background-color rgba(#e6e8f0, 0.5)
+  .form-item
+    padding 10px 0
+    height 28px
+    display flex
+    justify-content space-between
+    align-items center
+    font-size 14px
+    box-sizing content-box
+  .form-item-inline
+    padding-bottom 0
+  .label
+    flex 1 0 100px
+    display flex
+    align-items center
+    cursor default
+    >img
+      margin-right 10px
+  .check-box
+    display flex
+    align-items center
+    cursor pointer
+    color #aeb0c1
+    transition color .2s
+    >div
+      margin-right 8px
+      width 14px
+      height 14px
+      border-radius 2px
+      border solid 2px
+      background-image url('~@/assets/icon/check.svg')
+      transition background-color .1s
+    &[selected]
+      color #5f2eea
+      >div
+        background-color #5f2eea
+  .input
+    height 28px
+    display flex
+    align-items center
+    input
+      padding 0
+      flex 1 1 100px
+      width 100px
+      text-align right
+      font-family 'Noto Sans', sans-serif
+      font-size 18px
+      font-weight 600
+      line-height 28px
+      border none
+      outline none
+    hr
+      margin 0 8px
+      flex 0 0 1px
+      height 18px
+      border none
+      width 1px
+      background-color #000
+    span
+      flex 0 0 40px
+      width 40px
+      text-align right
+      font-size 12px
+  .form-button
+    margin-top 14px
+    height 40px
+    border-radius 3px
+    background-color #e3dcff
+    color rgba(#5f2eea, 0.5)
+    display flex
+    justify-content center
+    align-items center
+    font-weight 500
+    cursor not-allowed
+    transition color .2s, background-color .2s, border-color .2s
+    &[active]
+      background-color #5f2eea
+      color #fff
+      cursor pointer
+      &:active
+        background-color #3b16a6
+        color #fff
+    &[disabled]
+      background-color #fff
+      color #e6e8f0
+      border solid 1px #e6e8f0
+  .form-button-n
+    margin-top 14px
+    height 40px
+    border-radius 3px
+    border solid 1px #5f2eea
+    display flex
+    justify-content center
+    align-items center
+    font-weight 500
+    background-color #fff
+    color #5f2eea
+    cursor pointer
+    transition all .2s
+    &:active
+      color #3b16a6
+      border-color #3b16a6
+
+.tx-log
+  grid-column-end 9 span
+  padding 20px
+  .title
+    font-family 'Noto Sans', sans-serif
+    font-size 18px
+    font-weight 600
+    line-height 32px
+  .no-txs
+    margin-top 20px
+    height 40px
+    border-radius 3px
+    border solid 1px #ddd
+    display flex
+    justify-content center
+    align-items center
+    opacity .4
 
 .slide-enter, .slide-leave-to
   opacity 0
-.slide-enter-active, .slide-leave-active
-  transition opacity .6s !important
+.slide-enter-active
+  transition opacity .3s .2s !important
+.slide-leave-active
+  transition opacity .3s !important
 .slide-move
-  transition transform .6s !important
+  transition transform .3s !important
 </style>

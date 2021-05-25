@@ -1,12 +1,8 @@
 <template>
-  <div style="display: contents">
-    <template v-if="endTime">
-      <span>{{ date }}</span>
-      <!-- <span class="time-left">距离解锁还有: {{ timeLeft }}</span> -->
-    </template>
-    <template v-else>
-      <span>已解锁</span>
-    </template>
+  <div class="staking-status">
+    <span v-if="locked">{{ timeLeft }}</span>
+    <img v-if="locked" src="@/assets/lock/off.svg" />
+    <img v-else src="@/assets/lock/on.svg" />
   </div>
 </template>
 
@@ -18,10 +14,9 @@ export default {
       type: Number,
       default: 0,
     },
-  },
-  computed: {
-    date() {
-      return new Date(this.endTime).toLocaleString()
+    locked: {
+      type: Boolean,
+      default: true,
     },
   },
   data() {
@@ -31,8 +26,12 @@ export default {
       timeLeft: '',
     }
   },
+  watch: {
+    endTime() {
+      this.update()
+    },
+  },
   mounted() {
-    this.update()
     this.interval = setInterval(() => {
       this.update()
     }, 1000)
@@ -44,8 +43,11 @@ export default {
     update() {
       const now = Date.now()
       if (now > this.endTime) {
-        this.timeLeft = '0sec'
+        this.timeLeft = ''
+        this.$emit('update:locked', false)
         return
+      } else if (!this.locked) {
+        this.$emit('update:locked', true)
       }
       const dt = this.endTime - now
       const days = Math.floor(dt / 86400000)
@@ -69,7 +71,18 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.time-left
-  color #ccc
-  margin-left 20px
+.staking-status
+  position relative
+  span
+    position absolute
+    top 50%
+    left 50%
+    transform translate3d(-50%, -50%, 0)
+    white-space nowrap
+    font-weight 600
+    // text-shadow 2px 2px #fff, -2px 2px #fff, -2px -2px #fff, 2px -2px #fff, 2px 0 #fff, -2px 0 #fff, 0 -2px #fff, 0 2px #fff
+    // color #aeb0c1
+    display none
+  img
+    display block
 </style>

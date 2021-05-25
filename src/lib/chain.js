@@ -3,8 +3,8 @@ import Web3 from 'web3'
 import ERC20_ABI from '@/contract/ERC20.abi.json'
 import DORAID_ABI from '@/contract/DoraID.abi.json'
 
-const TEST_DORA_CONTRACT = '0xB784A999E6D127fA032c4cacB15aD88C401458Ec'
-const TEST_DORAID_CONTRACT = '0x2a4b9A9394337f1Fb2617B0A36aaC62c19bD73DD'
+const TEST_DORA_CONTRACT = '0x22CC3F3db9255b6b228A859Dc55156f840733139'
+const TEST_DORAID_CONTRACT = '0x53262b47178797eF8E777C6F0b0AE09eA85d9e33'
 
 const MAX_BALANCE = '10000000000000000000000000'
 
@@ -53,7 +53,7 @@ export default class Chain {
     return this.dora.methods['balanceOf'](addr)
       .call()
       .then((res) => {
-        return this.fromWei(res)
+        return this.fromWei(res, 2)
       })
       .catch(() => '0')
   }
@@ -103,9 +103,9 @@ export default class Chain {
       })
   }
 
-  async stake(addr, inputAmount, inputEndTime) {
+  async stake(addr, inputAmount, inputEndTimestamp) {
     const amount = this.web3.utils.toWei(inputAmount)
-    const endTime = Math.floor(new Date(inputEndTime).getTime() / 1000)
+    const endTime = Math.floor(inputEndTimestamp / 1000)
     const data = this.doraId.methods['stake'](amount, endTime).encodeABI()
     const tx = {
       from: addr,

@@ -352,7 +352,7 @@ nav
     align-items center
     font-weight 500
     cursor not-allowed
-    transition all .2s
+    transition color .2s, background-color .2s, border-color .2s
     &[active]
       background-color #5f2eea
       color #fff

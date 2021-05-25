@@ -80,7 +80,7 @@ export default new Vuex.Store({
 
     UPDATE_ROUTE(state, route) {
       state.route = route
-      history.pushState(null, '', '/' + route)
+      history.pushState(null, '', location.pathname + route)
     },
   },
   actions: {

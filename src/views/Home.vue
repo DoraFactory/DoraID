@@ -26,27 +26,39 @@
       </div>
       <div class="dora-states">
         <p class="title">Staking Status</p>
-        <p class="amount"></p>
-        <p class="unit">Unlocked</p>
+        <StakingTime :locked.sync="locked" :endTime="status.stakingEndTime" />
+        <p class="unit">{{ locked ? 'Locked' : 'Unlocked' }}</p>
       </div>
 
       <div class="dora-feature">
         <div class="title">
           <span>Stake</span>
         </div>
+        <Staking />
       </div>
       <div class="dora-feature">
         <div class="title">
           <span>Withdraw</span>
         </div>
+        <Withdraw />
       </div>
-      <div class="dora-feature">
-        <div class="title">
-          <span>Activate</span>
+      <div class="dora-feature" :foucs="toCertify">
+        <i />
+        <div class="container">
+          <div class="title">
+            <span>Certify</span>
+          </div>
+          <Activate />
         </div>
       </div>
 
-      <div class="tx-log"></div>
+      <div class="tx-log">
+        <p class="title">History</p>
+        <div class="no-txs" v-if="txList.length === 0">Empty</div>
+        <transition-group name="slide" tag="div">
+          <TxLog v-for="item in txList" :key="item.txHash" :tx="item" />
+        </transition-group>
+      </div>
       <!-- <div class="dora-info">
         <p>Dorayaki Balance: {{ status.balance }} DORA</p>
         <p>Staking Amount: {{ status.stakingAmount }} DORA</p>
@@ -57,13 +69,6 @@
         <Withdraw />
         <Activate />
         <ToAuth />
-      </div>
-      <div class="dora-logs">
-        <p>交易记录</p>
-        <div class="no-txs" v-if="txList.length === 0">Empty</div>
-        <transition-group name="slide">
-          <TxLog v-for="item in txList" :key="item.txHash" :tx="item" />
-        </transition-group>
       </div> -->
     </div>
   </div>
@@ -94,7 +99,10 @@ export default {
     TxLog,
   },
   computed: {
-    ...mapState(['account', 'chain', 'status', 'txList']),
+    ...mapState(['account', 'route', 'chain', 'status', 'txList']),
+    toCertify() {
+      return this.route.startsWith('#a?t=')
+    },
   },
   data() {
     return {
@@ -102,6 +110,7 @@ export default {
       authed: false,
       stakingAmount: '--',
       stakingEndTime: 0,
+      locked: true,
 
       timer: [0, 0],
     }
@@ -217,6 +226,8 @@ nav
   grid-column-end 3 span
   height 278px
   transition box-shadow .2s
+  position relative
+  z-index 1
   .title
     height 40px
     line-height 40px
@@ -247,7 +258,153 @@ nav
       color #5f2eea
       >span:after
         transform scaleX(1)
+  &[foucs]
+    background none
+    .container
+      background-color #fff
+      border-radius 8px
+      position absolute
+    >i
+      position fixed
+      top 0
+      left 0
+      right 0
+      bottom 0
+      background-color #0008
+
+.dora-form
+  padding 20px
+  >hr
+    margin 8px 0 12px
+    border none
+    height 1px
+    background-color rgba(#e6e8f0, 0.5)
+  .form-item
+    padding 10px 0
+    height 28px
+    display flex
+    justify-content space-between
+    align-items center
+    font-size 14px
+    box-sizing content-box
+  .form-item-inline
+    padding-bottom 0
+  .label
+    flex 1 0 100px
+    display flex
+    align-items center
+    cursor default
+    >img
+      margin-right 10px
+  .check-box
+    display flex
+    align-items center
+    cursor pointer
+    color #aeb0c1
+    transition color .2s
+    >div
+      margin-right 8px
+      width 14px
+      height 14px
+      border-radius 2px
+      border solid 2px
+      background-image url('~@/assets/icon/check.svg')
+      transition background-color .1s
+    &[selected]
+      color #5f2eea
+      >div
+        background-color #5f2eea
+  .input
+    height 28px
+    display flex
+    align-items center
+    input
+      padding 0
+      flex 1 1 100px
+      width 100px
+      text-align right
+      font-family 'Noto Sans', sans-serif
+      font-size 18px
+      font-weight 600
+      line-height 28px
+      border none
+      outline none
+    hr
+      margin 0 8px
+      flex 0 0 1px
+      height 18px
+      border none
+      width 1px
+      background-color #000
+    span
+      flex 0 0 40px
+      width 40px
+      text-align right
+      font-size 12px
+  .form-button
+    margin-top 14px
+    height 40px
+    border-radius 3px
+    background-color #e3dcff
+    color rgba(#5f2eea, 0.5)
+    display flex
+    justify-content center
+    align-items center
+    font-weight 500
+    cursor not-allowed
+    transition all .2s
+    &[active]
+      background-color #5f2eea
+      color #fff
+      cursor pointer
+      &:active
+        background-color #3b16a6
+        color #fff
+    &[disabled]
+      background-color #fff
+      color #e6e8f0
+      border solid 1px #e6e8f0
+  .form-button-n
+    margin-top 14px
+    height 40px
+    border-radius 3px
+    border solid 1px #5f2eea
+    display flex
+    justify-content center
+    align-items center
+    font-weight 500
+    background-color #fff
+    color #5f2eea
+    cursor pointer
+    transition all .2s
+    &:active
+      color #3b16a6
+      border-color #3b16a6
+
 .tx-log
   grid-column-end 9 span
-  min-height 100px
+  padding 20px
+  .title
+    font-family 'Noto Sans', sans-serif
+    font-size 18px
+    font-weight 600
+    line-height 32px
+  .no-txs
+    margin-top 20px
+    height 40px
+    border-radius 3px
+    border solid 1px #ddd
+    display flex
+    justify-content center
+    align-items center
+    opacity .4
+
+.slide-enter, .slide-leave-to
+  opacity 0
+.slide-enter-active
+  transition opacity .3s .2s !important
+.slide-leave-active
+  transition opacity .3s !important
+.slide-move
+  transition transform .3s !important
 </style>

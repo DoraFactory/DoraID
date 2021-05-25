@@ -1,16 +1,26 @@
 <template>
-  <div id="activate">
-    <div class="activate-button full fc" :opened="opened" :disabled="status.authed" @click="toggle">
-      <span>Activate</span>
-      <span v-if="status.authed">(Authed)</span>
-    </div>
-    <div class="border full"></div>
-    <div class="activate">
-      <div @click="copy">
-        <img src="@/assets/share.svg" />
-        <span>复制我的链接</span>
+  <div class="dora-form">
+    <template v-if="toCertify">
+      <div class="to-cretify">
+        <p>Please kindly help</p>
+        <p>{{ aim }}</p>
+        <p>certify the account</p>
       </div>
+      <div class="form-buttons">
+        <div class="form-button-n" @click="stop">No</div>
+        <div class="form-button" active @click="activate">Confirm</div>
+      </div>
+    </template>
+    <div class="certified" v-else-if="status.authed">
+      <img width="60px" src="@/assets/logo-s.svg" />
+      <span>You've Certified</span>
     </div>
+    <template v-else>
+      <div class="certify-bg">
+        <img src="@/assets/certify.svg" />
+      </div>
+      <div class="form-button" active @click="copy">Copy My Link</div>
+    </template>
   </div>
 </template>
 
@@ -20,18 +30,20 @@ import { mapState } from 'vuex'
 export default {
   name: 'Activate',
   computed: {
-    ...mapState(['account', 'route', 'status']),
-    opened() {
-      return this.route === '#activate'
+    ...mapState(['account', 'route', 'chain', 'status']),
+    toCertify() {
+      return this.route.startsWith('#a?t=')
+    },
+    aim() {
+      const r = this.route.match(/0x[a-fA-F0-9]{40}/)
+      if (r && r.length) {
+        return r[0]
+      } else {
+        return ''
+      }
     },
   },
   methods: {
-    activate() {
-      if (this.status.authed) {
-        return
-      }
-      this.$toast.info('This feature is coming soon.')
-    },
     toggle() {
       if (this.status.authed) {
         return
@@ -43,63 +55,67 @@ export default {
       }
     },
     copy() {
-      this.$store.commit('UPDATE_ROUTE', '#a?t=' + this.account.toLowerCase())
+      // this.$store.commit('UPDATE_ROUTE', '#a?t=' + this.account.toLowerCase())
 
       const input = document.createElement('input')
       document.body.appendChild(input)
-      input.value = location.href
+      input.value = location.origin + location.pathname + '#a?t=' + this.account.toLowerCase()
       input.select()
       document.execCommand('copy')
       document.body.removeChild(input)
 
       this.$toast.success('Link copied!')
     },
+    stop() {
+      this.$store.commit('UPDATE_ROUTE', '')
+    },
+    async activate() {
+      const txHash = await this.chain.activate(this.account, this.aim)
+      if (!txHash) {
+        return this.$toast.warning('Transaction not sent!')
+      }
+      this.$toast.success('Transaction sent, please wait patiently.')
+      this.amount = ''
+      this.endTime = ''
+      this.$store.commit('UPDATE_ROUTE', '')
+      this.$store.commit('PUSH_TX', {
+        txHash,
+        type: 'Activate',
+      })
+    },
   },
 }
 </script>
 
 <style lang="stylus" scoped>
-#activate
-  overflow hidden
-  position relative
-  background-color #fff
-  box-shadow inset 4px 6px 20px #0002
-.activate-button
-  color #0a707f
-  flex-direction column
-  background-image linear-gradient(-30deg, #a2faff 0%, #7fdaf1 100%)
-  // background-image radial-gradient(circle 400px at center, #a2faff 0%, #7fdaf1 47%, #4cb5ff 100%)
-  transition all .5s
-  cursor pointer
-  z-index 100
-  >span:first-child
-    font-size 36px
-  >p
-    margin-top 4px
-  &[opened]
-    transform translateX(calc(100% - 40px))
-  &[disabled]
-    color #0a707f80
-    filter grayscale(.86) brightness(1.08)
-    cursor not-allowed
-.border
-  background-color #1bd3ea
-  transform translateX(calc(100% - 48px))
-  transition transform .5s
-  z-index 50
-.activate
-  padding 40px 0
-  margin 0 80px 0 40px
-  height 100%
-  font-size 14px
-  position relative
-  box-sizing border-box
+.to-cretify
+  height 144px
   display flex
   flex-direction column
   justify-content center
+  align-items center
+  font-size 14px
+.certified
+  height 198px
+  display flex
+  flex-direction column
+  justify-content center
+  align-items center
+  color #5f2eea
+  opacity 0.5
+  span
+    margin 8px 0
+    font-size 14px
+.certify-bg
+  height 144px
+  display flex
+  justify-content center
+  align-items center
+.form-buttons
+  display flex
   >div
-    cursor pointer
-    color #0a707f
-  img
-    width 100%
+    flex 2 1 auto
+  >div:first-child
+    margin-right 10px
+    flex 0.5 1 auto
 </style>

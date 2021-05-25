@@ -1,16 +1,51 @@
 <template>
-  <div id="withdraw">
-    <div class="withdraw-button full fc" :opened="opened" :disabled="disabled" @click="toggle">
-      <transition name="fade">
-        <span v-if="!opened">Withdraw</span>
-      </transition>
-      <p v-if="disabled">( After: {{ timeLeft }} )</p>
-    </div>
-    <div class="border full"></div>
-    <div class="withdraw-form">
-      <p>取回质押数量<input type="number" min="0" v-model="amount" />DORA</p>
-      <div class="confirm" @click="unstake">Confirm</div>
-    </div>
+  <div class="dora-form">
+    <template v-if="disabled">
+      <p class="staked">
+        <img src="@/assets/icon/staked.svg" />
+        Staked
+      </p>
+      <div class="form-item">
+        <p class="label">
+          <img src="@/assets/icon/locked.svg" />
+          <span>Unlocked time</span>
+        </p>
+        <div>{{ date }}</div>
+      </div>
+      <div class="form-item">
+        <p class="label">
+          <img src="@/assets/icon/timeleft.svg" />
+          <span>Left staking period</span>
+        </p>
+        <div>{{ timeLeft }}</div>
+      </div>
+    </template>
+    <template v-else>
+      <div class="form-item">
+        <p class="label">
+          <img src="@/assets/icon/amount.svg" />
+          <span>Withdraw staking amount</span>
+        </p>
+        <div class="check-box" @click="toggleAll" :selected="all">
+          <div></div>
+          <span>All</span>
+        </div>
+      </div>
+      <div class="input">
+        <input type="number" placeholder="0" v-model="amount" :disabled="all" />
+        <hr />
+        <span>DORA</span>
+      </div>
+      <hr />
+      <div class="form-item form-item-inline">
+        <p class="label">
+          <img src="@/assets/icon/period.svg" />
+          <span>Advanced feature</span>
+        </p>
+      </div>
+      <hr style="opacity: 0" />
+    </template>
+    <div class="form-button" :disabled="disabled" :active="active" @click="unstake">Confirm</div>
   </div>
 </template>
 
@@ -21,18 +56,21 @@ export default {
   name: 'Withdraw',
   computed: {
     ...mapState(['account', 'route', 'chain', 'status']),
-    opened() {
-      return this.route === '#withdraw'
-    },
     disabled() {
       return Date.now() < this.status.stakingEndTime
+    },
+    active() {
+      return !!Number(this.amount)
+    },
+    date() {
+      return new Date(this.status.stakingEndTime).toLocaleDateString()
     },
   },
   data() {
     return {
+      all: false,
       interval: 0,
       timeLeft: '',
-
       amount: '',
     }
   },
@@ -46,14 +84,12 @@ export default {
     clearInterval(this.interval)
   },
   methods: {
-    toggle() {
-      if (this.disabled) {
-        return
-      }
-      if (this.opened) {
-        this.$store.commit('UPDATE_ROUTE', '')
+    toggleAll() {
+      this.all = !this.all
+      if (this.all) {
+        this.amount = this.status.stakingAmount
       } else {
-        this.$store.commit('UPDATE_ROUTE', '#withdraw')
+        this.amount = ''
       }
     },
     update() {
@@ -81,7 +117,9 @@ export default {
       this.timeLeft = output
     },
     async unstake() {
-      // TODO: check input parameter
+      if (!this.active) {
+        return
+      }
       const txHash = await this.chain.unstake(this.account, this.amount)
       if (!txHash) {
         return this.$toast.warning('Transaction not sent!')
@@ -99,67 +137,13 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-#withdraw
-  overflow hidden
-  position relative
-  background-color #fff
-  box-shadow inset 4px 6px 20px #0002
-.withdraw-button
-  color #856a36
-  flex-direction column
-  background-image linear-gradient(-30deg, #f6d365 0%, #ffaa6d 100%)
-  transition all .5s
-  cursor pointer
-  z-index 100
-  >span
-    font-size 36px
-  >p
-    margin-top 4px
-  &[opened]
-    transform translateX(calc(100% - 40px))
-  &[disabled]
-    color #856a36a0
-    filter grayscale(.94) brightness(1.2)
-    cursor not-allowed
-.border
-  background-image linear-gradient(30deg, #f6d365 0%, #fdd885 100%)
-  transform translateX(calc(100% - 48px))
-  transition transform .5s
-  z-index 50
-.withdraw-form
-  padding 40px 0
-  margin 0 80px 0 40px
-  height 100%
-  font-size 18px
-  position relative
-  box-sizing border-box
-  p
-    margin-bottom 10px
-    display flex
-    align-items center
-  input[type=number]
-    margin 0 10px
-    width 100px
-  .confirm
-    position absolute
-    left 0
-    bottom 40px
-    width 100%
-    height 60px
-    border-radius 30px
-    display flex
-    justify-content center
-    align-items center
-    background-color #ffa44d
-    color #fff
-    font-size 24px
-    font-weight 500
-    cursor pointer
-
-.fade-enter, .fade-leave-to
-  opacity 0
-.fade-leave-active
-  transition opacity .2s
-.fade-enter-active
-  transition opacity .3s .2s
+.staked
+  padding 10px
+  line-height 28px
+  display flex
+  justify-content center
+  align-items center
+  color rgba(#5f2eea, 0.5)
+  >img
+    margin-right 8px
 </style>

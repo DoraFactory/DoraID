@@ -151,7 +151,7 @@ contract DoraID {
     UserInfo storage user = _users[msg.sender];
     _updatePOS(user);
 
-    require(user.stakingEndTime <= _endTime, "Can not set an earlier staking time");
+    require(user.stakingEndTime <= _endTime || user.stakingAmount == 0, "Can not set an earlier staking time");
     
     uint256 totalStaking = user.stakingAmount.add(_amount);
 

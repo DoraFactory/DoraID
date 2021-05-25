@@ -103,9 +103,9 @@ export default class Chain {
       })
   }
 
-  async stake(addr, inputAmount, inputEndTime) {
+  async stake(addr, inputAmount, inputEndTimestamp) {
     const amount = this.web3.utils.toWei(inputAmount)
-    const endTime = Math.floor(new Date(inputEndTime).getTime() / 1000)
+    const endTime = Math.floor(inputEndTimestamp / 1000)
     const data = this.doraId.methods['stake'](amount, endTime).encodeABI()
     const tx = {
       from: addr,

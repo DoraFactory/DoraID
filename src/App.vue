@@ -59,11 +59,17 @@ body
   width 100%
   height 100%
   box-sizing border-box
-input
-  height 40px
-  border solid 1px #ccc
-  padding 0 10px
-  font inherit
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button
+  -webkit-appearance none !important
+  margin 0
+input[type='number']
+  -moz-appearance none
+input:disabled
+  background-color inherit
+::placeholder
+  color inherit
 
 .main-width
   margin auto

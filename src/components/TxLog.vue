@@ -4,10 +4,13 @@
     <span class="hash">
       TxHash:
       <a target="_blank" :href="`https://etherscan.io/tx/${tx.txHash}`">
-        <code>{{ tx.txHash }}</code>
+        {{ tx.txHash }}
       </a>
     </span>
-    <span class="status">{{ tx.status }}</span>
+    <span class="status">
+      <img :src="require(`@/assets/logs/${tx.status.toLowerCase()}.svg`)" />
+      {{ tx.status }}
+    </span>
   </div>
 </template>
 
@@ -29,38 +32,42 @@ export default {
 
 <style lang="stylus" scoped>
 .tx-log
-  margin-bottom 10px
-  padding 0 40px
-  height 60px
-  border-radius 20px
+  margin-top 20px
+  padding 0 50px
+  height 40px
+  border-radius 3px
   display flex
   align-items center
-  justify-content center
-  background-color #e4e9f1
-  background-image linear-gradient(135deg, rgba(#f5f7fa, 0.8) 0%, rgba(#c3cfe2, 0) 100%)
-  font-size 18px
-  color rgba(#000, .8)
-  transition background-color 1s
+  border solid 1px #ffe58f
+  background-color #ffe58f
+  background-image linear-gradient(to right, rgba(#fff, 0.1), rgba(#fff, 0.7))
+  transition background-color .4s, border-color .2s
   .type
-    flex 0 0 140px
-    font-weight 800
+    flex 0 0 120px
+    font-weight 500
   .hash
     flex 1 1 auto
     a
       color inherit
       text-decoration none
   .status
-    flex 0 0 100px
-    text-align right
-    font-weight 800
+    flex 0 0 120px
+    font-weight 500
+    display flex
+    align-items center
+    color #faad14
     transition color .4s
+    >img
+      margin-right 14px
 
 .tx-log-success
-  background-color #d6f3ad
+  background-color #b7eb8f
+  border-color #b7eb8f
   .status
-    color #689f38
+    color #52c41a
 .tx-log-fail
-  background-color #f9dada
+  background-color #ffe2e0
+  border-color #ffe2e0
   .status
-    color #e57373
+    color #f5222d
 </style>

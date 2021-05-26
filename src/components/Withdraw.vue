@@ -38,10 +38,14 @@
       </div>
       <hr />
       <div class="form-item form-item-inline">
-        <p class="label">
+        <a
+          class="label"
+          target="_blank"
+          href="https://testnet.bscscan.com/address/0x53262b47178797eF8E777C6F0b0AE09eA85d9e33#writeContract"
+        >
           <img src="@/assets/icon/period.svg" />
           <span>Advanced feature</span>
-        </p>
+        </a>
       </div>
       <hr style="opacity: 0" />
     </template>

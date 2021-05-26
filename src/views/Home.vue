@@ -59,32 +59,17 @@
           <TxLog v-for="item in txList" :key="item.txHash" :tx="item" />
         </transition-group>
       </div>
-      <!-- <div class="dora-info">
-        <p>Dorayaki Balance: {{ status.balance }} DORA</p>
-        <p>Staking Amount: {{ status.stakingAmount }} DORA</p>
-        <p>Staking Time: <StakingTime :endTime="status.stakingEndTime" /></p>
-      </div>
-      <div class="dora-console">
-        <Staking />
-        <Withdraw />
-        <Activate />
-        <ToAuth />
-      </div> -->
     </div>
   </div>
 </template>
 
 <script>
-/* eslint-disable vue/no-unused-components */
-
 import { mapState } from 'vuex'
 
 import StakingTime from '@/components/StakingTime'
 import Staking from '@/components/Staking'
 import Withdraw from '@/components/Withdraw'
 import Activate from '@/components/Activate'
-
-import ToAuth from '@/components/ToAuth'
 
 import TxLog from '@/components/TxLog'
 
@@ -95,7 +80,6 @@ export default {
     Staking,
     Withdraw,
     Activate,
-    ToAuth,
     TxLog,
   },
   computed: {
@@ -287,6 +271,13 @@ nav
     align-items center
     font-size 14px
     box-sizing content-box
+    >a
+      color inherit
+      transition color .2s
+      text-decoration none
+      cursor pointer
+    >a:hover
+      color #251abb
   .form-item-inline
     padding-bottom 0
   .label

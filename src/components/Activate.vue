@@ -15,12 +15,20 @@
       <img width="60px" src="@/assets/logo-s.svg" />
       <span>You've Certified</span>
     </div>
-    <template v-else>
-      <div class="certify-bg">
-        <img src="@/assets/certify.svg" />
+    <div class="not-certified" v-else>
+      <div :blur="!enoughAmount || !enoughPeriod">
+        <div class="certify-bg">
+          <img src="@/assets/certify.svg" />
+        </div>
+        <div class="form-button" active @click="copy">Copy My Link</div>
       </div>
-      <div class="form-button" active @click="copy">Copy My Link</div>
-    </template>
+      <div v-if="!enoughAmount || !enoughPeriod" class="mask">
+        <p class="sub-title">Not meet the verification requirements</p>
+        <hr />
+        <p :error="!enoughAmount">Required Staking Amount <span>> 10 DORA</span></p>
+        <p :error="!enoughPeriod">Required Staking Period <span>> 30 Days</span></p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -31,6 +39,12 @@ export default {
   name: 'Activate',
   computed: {
     ...mapState(['account', 'route', 'chain', 'status']),
+    enoughAmount() {
+      return Number(this.status.stakingAmount) > 10
+    },
+    enoughPeriod() {
+      return this.status.stakingEndTime - Date.now() > 2592000000
+    },
     toCertify() {
       return this.route.startsWith('#a?t=')
     },
@@ -106,6 +120,36 @@ export default {
   span
     margin 8px 0
     font-size 14px
+
+.not-certified
+  position relative
+  >div[blur]
+    filter blur(3px)
+  hr
+    margin 0
+    border none
+    height 1px
+    background-color rgba(#e6e8f0, 0.5)
+  .mask
+    position absolute
+    top -5px
+    left -5px
+    right -5px
+    bottom -5px
+    padding 5px
+    background-color #fffc
+
+    font-size 14px
+    .sub-title
+      margin-bottom 20px
+      font-weight 600
+    p
+      line-height 28px
+      margin 10px 0
+      display flex
+      justify-content space-between
+    p[error] span
+      color #e91e63
 .certify-bg
   height 144px
   display flex

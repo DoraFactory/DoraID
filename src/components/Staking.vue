@@ -3,7 +3,7 @@
     <div class="form-item">
       <p class="label">
         <img src="@/assets/icon/amount.svg" />
-        <span>Add staking amount</span>
+        <span>Add Staking Amount</span>
       </p>
       <div class="check-box" @click="toggleAll" :selected="all">
         <div></div>
@@ -19,7 +19,7 @@
     <div class="form-item form-item-inline">
       <p class="label">
         <img src="@/assets/icon/period.svg" />
-        <span>All Staking period</span>
+        <span>All Staking Period</span>
       </p>
       <div class="input">
         <input

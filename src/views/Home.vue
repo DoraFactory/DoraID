@@ -53,7 +53,10 @@
       </div>
 
       <div class="tx-log">
-        <p class="title">History</p>
+        <div class="title-container">
+          <p class="title">History</p>
+          <span>save only in current session</span>
+        </div>
         <div class="no-txs" v-if="txList.length === 0">Empty</div>
         <transition-group name="slide" tag="div">
           <TxLog v-for="item in txList" :key="item.txHash" :tx="item" />
@@ -320,6 +323,8 @@ nav
       line-height 28px
       border none
       outline none
+    input[error]
+      color #e91e63
     hr
       margin 0 8px
       flex 0 0 1px
@@ -375,6 +380,13 @@ nav
 .tx-log
   grid-column-end 9 span
   padding 20px
+  .title-container
+    display flex
+    justify-content space-between
+    align-items center
+    span
+      opacity .3
+      font-size 12px
   .title
     font-family 'Noto Sans', sans-serif
     font-size 18px

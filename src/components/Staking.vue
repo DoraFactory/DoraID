@@ -22,7 +22,13 @@
         <span>All Staking period</span>
       </p>
       <div class="input">
-        <input type="number" :placeholder="minStakingDays" v-model="period" />
+        <input
+          type="number"
+          :placeholder="minStakingDays"
+          v-model="period"
+          @input="inputPeriodError = false"
+          :error="inputPeriodError"
+        />
         <hr />
         <span>Days</span>
       </div>
@@ -43,6 +49,8 @@ export default {
       all: false,
       amount: '',
       period: '',
+
+      inputPeriodError: false,
     }
   },
   computed: {
@@ -86,10 +94,16 @@ export default {
         return
       }
       const amount = this.amount || '0'
-      const ts = this.period
-        ? Math.max(Date.now() + Number(this.period || 0) * 86400000, this.status.stakingEndTime)
+      const period = this.period
+        ? Date.now() + Number(this.period) * 86400000
         : this.status.stakingEndTime
-      const txHash = await this.chain.stake(this.account, amount, ts)
+      if (period < this.status.stakingEndTime) {
+        this.inputPeriodError = true
+        return this.$toast.error(
+          "You can't set the staking time to a smaller time than the current."
+        )
+      }
+      const txHash = await this.chain.stake(this.account, amount, period)
       if (!txHash) {
         return this.$toast.warning('Transaction not sent!')
       }

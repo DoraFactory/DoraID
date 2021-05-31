@@ -10,6 +10,7 @@ import 'vue-toast-notification/dist/theme-sugar.css'
 
 Vue.use(VueToast, {
   duration: 6000,
+  position: 'top',
 })
 
 Vue.config.productionTip = false

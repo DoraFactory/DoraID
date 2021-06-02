@@ -7,6 +7,7 @@ const TEST_DORA_CONTRACT = '0x22CC3F3db9255b6b228A859Dc55156f840733139'
 const TEST_DORAID_CONTRACT = '0x53262b47178797eF8E777C6F0b0AE09eA85d9e33'
 
 const MAX_BALANCE = '10000000000000000000000000'
+const ACTIVATION_FEE = 6e21
 
 export default class Chain {
   constructor() {
@@ -68,17 +69,21 @@ export default class Chain {
   }
 
   async getStatus(addr) {
-    return this.doraId.methods['statusOf'](addr)
-      .call()
-      .then((res) => {
-        const endTime = Number(res.stakingEndTime) * 1000
+    return Promise.all([
+      this.doraId.methods['proofOf'](addr).call(),
+      this.doraId.methods['statusOf'](addr).call(),
+    ])
+      .then(([proof, status]) => {
+        const endTime = Number(status.stakingEndTime) * 1000
         return {
-          authenticated: res.authenticated,
-          stakingAmount: this.fromWei(res.stakingAmount, 2),
+          proof: Math.floor(Number(proof) / ACTIVATION_FEE),
+          authenticated: status.authenticated,
+          stakingAmount: this.fromWei(status.stakingAmount, 2),
           stakingEndTime: endTime < Date.now() ? 0 : endTime,
         }
       })
       .catch(() => ({
+        proof: 0,
         authenticated: false,
         stakingAmount: '0',
         stakingEndTime: 0,

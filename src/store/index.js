@@ -21,6 +21,7 @@ export default new Vuex.Store({
       authed: false,
       stakingAmount: '--',
       stakingEndTime: 0,
+      proof: 0,
     },
 
     txList: [],
@@ -119,6 +120,7 @@ export default new Vuex.Store({
         const result = {
           balance,
           allowance: Number(allowance),
+          proof: status.proof,
           authed: status.authenticated,
           stakingAmount: status.stakingAmount,
           stakingEndTime: status.stakingEndTime,

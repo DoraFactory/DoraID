@@ -2,6 +2,7 @@ module.exports = {
   root: true,
   env: {
     node: true,
+    mocha: true,
   },
   extends: ['plugin:vue/essential', 'eslint:recommended', '@vue/prettier'],
   parserOptions: {

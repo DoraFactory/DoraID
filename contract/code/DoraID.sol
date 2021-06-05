@@ -2,10 +2,10 @@
 pragma solidity 0.8.2;
 
 /**
- * @title ERC20
+ * @title IERC20
  * @dev Basic interface of ERC20 Standard
  */
-interface ERC20 {
+interface IERC20 {
   function balanceOf(address who) external view returns (uint256);
   function transfer(address to, uint256 value) external returns (bool);
   function transferFrom(address from, address to, uint256 value) external returns (bool);
@@ -40,7 +40,7 @@ library SafeMath {
 contract DoraID {
   using SafeMath for uint256;
 
-  ERC20 public DORAYAKI;
+  IERC20 public DORAYAKI;
 
   uint256 constant public MIN_AUTH_STAKING = 10 ether;
   uint256 constant public MIN_AUTH_DURATION = 30 days;
@@ -72,7 +72,7 @@ contract DoraID {
   event Activate(address indexed _parent, address indexed _child);
   event Stake(address indexed _user, uint256 _totalAmount, uint256 _endTime);
 
-  constructor(ERC20 _dora, address[] memory _initUserList, uint256[] memory _initPOSList) {
+  constructor(IERC20 _dora, address[] memory _initUserList, uint256[] memory _initPOSList) {
     DORAYAKI = _dora;
 
     require(_initUserList.length == _initPOSList.length, "Parameter array length mismatch");
@@ -242,7 +242,7 @@ contract DoraID {
     if (proof > MAX_STORED_POS) {
       proof = MAX_STORED_POS;
     }
-     _user.proofOfStake = proof;
+    _user.proofOfStake = proof;
     _user.lastSeen = block.timestamp;
   }
 }

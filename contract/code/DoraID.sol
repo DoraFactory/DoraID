@@ -109,7 +109,7 @@ contract DoraID {
       return 0;
     }
     proof = user.proofOfStake.add((block.timestamp.sub(user.lastSeen)).mul(user.stakingAmount));
-    if (proof > MAX_STORED_POS) {
+    if (user.proofOfStake <= MAX_STORED_POS && proof > MAX_STORED_POS) {
       proof = MAX_STORED_POS;
     }
   }
@@ -239,7 +239,7 @@ contract DoraID {
     if (_user.authenticated) {
       proof = _user.proofOfStake.add((block.timestamp.sub(_user.lastSeen)).mul(_user.stakingAmount));
     }
-    if (proof > MAX_STORED_POS) {
+    if (_user.proofOfStake <= MAX_STORED_POS && proof > MAX_STORED_POS) {
       proof = MAX_STORED_POS;
     }
     _user.proofOfStake = proof;

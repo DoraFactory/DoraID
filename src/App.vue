@@ -11,7 +11,7 @@ import { mapState } from 'vuex'
 import Home from '@/views/Home.vue'
 import Login from '@/views/Login.vue'
 
-const NETWORK = 97
+const NETWORK = 56
 
 export default {
   name: 'App',

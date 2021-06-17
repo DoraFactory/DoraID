@@ -3,7 +3,7 @@
     <div class="login-box">
       <img src="@/assets/logo.svg" alt="logo" />
       <p class="notice">Please connect wallet to login</p>
-      <div v-if="netError" class="net-error">Network Error. expect BSC Test Net</div>
+      <div v-if="netError" class="net-error">Network Error. expect BSC Net</div>
       <div v-else class="login-button" @click="login"></div>
     </div>
   </div>

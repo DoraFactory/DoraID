@@ -3,8 +3,12 @@ import Web3 from 'web3'
 import ERC20_ABI from '@/contract/ERC20.abi.json'
 import DORAID_ABI from '@/contract/DoraID.abi.json'
 
-const TEST_DORA_CONTRACT = '0x22CC3F3db9255b6b228A859Dc55156f840733139'
-const TEST_DORAID_CONTRACT = '0x53262b47178797eF8E777C6F0b0AE09eA85d9e33'
+// const TEST_DORA_CONTRACT = '0x22CC3F3db9255b6b228A859Dc55156f840733139'
+// const TEST_DORAID_CONTRACT = '0x53262b47178797eF8E777C6F0b0AE09eA85d9e33'
+
+const DORA_CONTRACT = '0x7ab088fedae4fa8ada4df638c07cef6c23aff002'
+const DORAID_CONTRACT = '0xfDaC13AAf14Fb3A814f43C65F497c4547e288B4c'
+// const AUTH_CONTRACT = '0x077DF55191994C347444e025C17f88fB6b104F7b'
 
 const MAX_BALANCE = '10000000000000000000000000'
 const ACTIVATION_FEE = 6e21
@@ -60,7 +64,7 @@ export default class Chain {
   }
 
   async getAllowance(addr) {
-    return this.dora.methods['allowance'](addr, TEST_DORAID_CONTRACT)
+    return this.dora.methods['allowance'](addr, DORAID_CONTRACT)
       .call()
       .then((res) => {
         return this.fromWei(res)
@@ -91,10 +95,10 @@ export default class Chain {
   }
 
   async approve(addr) {
-    const data = this.dora.methods['approve'](TEST_DORAID_CONTRACT, MAX_BALANCE).encodeABI()
+    const data = this.dora.methods['approve'](DORAID_CONTRACT, MAX_BALANCE).encodeABI()
     const tx = {
       from: addr,
-      to: TEST_DORA_CONTRACT,
+      to: DORA_CONTRACT,
       data,
     }
     return window.ethereum
@@ -114,7 +118,7 @@ export default class Chain {
     const data = this.doraId.methods['stake'](amount, endTime).encodeABI()
     const tx = {
       from: addr,
-      to: TEST_DORAID_CONTRACT,
+      to: DORAID_CONTRACT,
       data,
     }
     return window.ethereum
@@ -133,7 +137,7 @@ export default class Chain {
     const data = this.doraId.methods['unstake'](amount).encodeABI()
     const tx = {
       from: addr,
-      to: TEST_DORAID_CONTRACT,
+      to: DORAID_CONTRACT,
       data,
     }
     return window.ethereum
@@ -151,7 +155,7 @@ export default class Chain {
     const data = this.doraId.methods['activate'](aim).encodeABI()
     const tx = {
       from: addr,
-      to: TEST_DORAID_CONTRACT,
+      to: DORAID_CONTRACT,
       data,
     }
     return window.ethereum
@@ -167,7 +171,7 @@ export default class Chain {
 
   _initWeb3(provider) {
     this.web3 = new Web3(provider)
-    this.dora = new this.web3.eth.Contract(ERC20_ABI, TEST_DORA_CONTRACT)
-    this.doraId = new this.web3.eth.Contract(DORAID_ABI, TEST_DORAID_CONTRACT)
+    this.dora = new this.web3.eth.Contract(ERC20_ABI, DORA_CONTRACT)
+    this.doraId = new this.web3.eth.Contract(DORAID_ABI, DORAID_CONTRACT)
   }
 }

@@ -11,7 +11,7 @@
       </div>
     </div>
     <div class="input">
-      <input type="number" placeholder="0" v-model="amount" :disabled="all" />
+      <input type="number" placeholder="0" v-model="amount" :disabled="all || specified" />
       <hr />
       <span>DORA</span>
     </div>
@@ -26,6 +26,7 @@
           type="number"
           :placeholder="minStakingDays"
           v-model="period"
+          :disabled="specified"
           @input="inputPeriodError = false"
           :error="inputPeriodError"
         />
@@ -65,6 +66,22 @@ export default {
     active() {
       return !!(Number(this.amount) || Number(this.period))
     },
+    specified() {
+      const r = this.route.match(/\?a=([0-9.]+)&d=([0-9]+)/)
+      if (r && r.length) {
+        return {
+          amount: r[1],
+          ddl: Number(r[2]) * 1000,
+        }
+      } else {
+        return null
+      }
+    },
+  },
+  watch: {
+    status() {
+      this.updateRq()
+    },
   },
   methods: {
     toggleAll() {
@@ -73,6 +90,20 @@ export default {
         this.amount = this.status.balance
       } else {
         this.amount = ''
+      }
+    },
+    updateRq() {
+      if (this.specified) {
+        this.amount = Math.max(
+          0,
+          Number(
+            (Number(this.specified.amount) - Number(this.status.stakingAmount) || 0).toFixed(4)
+          )
+        ).toString()
+        const now = Date.now()
+        const min = Math.max(0, Math.ceil((this.status.stakingEndTime - now) / 86400000))
+        const req = Math.ceil((this.specified.ddl - now) / 86400000)
+        this.period = req > min ? req.toString() : ''
       }
     },
     async approve() {

@@ -30,11 +30,14 @@
         <p class="unit">{{ locked ? 'Locked' : 'Unlocked' }}</p>
       </div>
 
-      <div class="dora-feature">
-        <div class="title">
-          <span>Stake</span>
+      <div class="dora-feature" :foucs="toStaking">
+        <i @click="stop" />
+        <div class="container">
+          <div class="title">
+            <span>Stake</span>
+          </div>
+          <Staking />
         </div>
-        <Staking />
       </div>
       <div class="dora-feature">
         <div class="title">
@@ -43,7 +46,7 @@
         <Withdraw />
       </div>
       <div class="dora-feature" :foucs="toCertify">
-        <i />
+        <i @click="stop" />
         <div class="container">
           <div class="title">
             <span>Certify</span>
@@ -90,6 +93,9 @@ export default {
     toCertify() {
       return this.route.startsWith('#a?t=')
     },
+    toStaking() {
+      return /\?a=[0-9.]+&d=[0-9]+/.test(this.route)
+    },
   },
   data() {
     return {
@@ -117,6 +123,9 @@ export default {
   methods: {
     logOut() {
       this.$store.dispatch('DISCONNECT')
+    },
+    stop() {
+      this.$store.commit('UPDATE_ROUTE', '')
     },
   },
 }
@@ -214,7 +223,7 @@ nav
   height 278px
   transition box-shadow .2s
   position relative
-  z-index 1
+  z-index 0
   .title
     height 40px
     line-height 40px
@@ -247,10 +256,11 @@ nav
         transform scaleX(1)
   &[foucs]
     background none
+    z-index 1
     .container
       background-color #fff
       border-radius 8px
-      position absolute
+      position relative
     >i
       position fixed
       top 0
